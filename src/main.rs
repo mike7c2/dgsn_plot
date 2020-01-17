@@ -119,6 +119,13 @@ fn main() {
                 .takes_value(true)
                 .help("Center frequency of input data"),
         )
+        .arg(
+            Arg::with_name("dc")
+                .short("d")
+                .long("dc")
+                .takes_value(true)
+                .help("Down conversion factor"),
+        )
         .get_matches();
 
     // Variables for arguments and parameters
@@ -129,6 +136,7 @@ fn main() {
     let mut cf = 100000000;
     let mut nseg = 0;
     let mut input_is_float = true;
+    let mut dc = 1;
 
     // Read arguments
     if let Some(o) = matches.value_of("nfft") {
@@ -153,6 +161,10 @@ fn main() {
 
     if matches.is_present("i") {
         input_is_float = false;
+    }
+
+    if let Some(o) = matches.value_of("dc") {
+        dc = o.parse::<usize>().unwrap();
     }
 
     // Time for each window
