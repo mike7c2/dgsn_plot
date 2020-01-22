@@ -220,8 +220,8 @@ fn main() {
                         };
                     } else {
                         for j in 0..nfft {
-                            conv[j] = Complex32::new((mmap[idx + (j * 2)] as f32 - 127.0)/127.0, 
-                                                     (mmap[idx + (j * 2) + 1] as f32 - 127.0)/127.0);
+                            conv[j] = Complex32::new((mmap[(idx + j) * 2] as f32 - 127.0)/127.0,
+                                                     (mmap[(idx + j) * 2 + 1] as f32 - 127.0)/127.0);
                         }
                         in_data = &conv;
                     }
@@ -270,7 +270,7 @@ fn main() {
             }
         }
         println!("Processing Complete");
-        waterfall_image(o, &psd_data[..nfft * (nseg/average)], nfft as u32, (nseg/average) as u32, cf as f32, bw as f32, twin, true, &background_spectrum);
+        waterfall_image(o, &psd_data, nfft as u32, (nseg/average) as u32, cf as f32, bw as f32, twin, true, &background_spectrum);
     }
 
     let new_now = Instant::now();
