@@ -20,12 +20,21 @@ use rayon::prelude::*;
 
 use gnuplot::*;
 
-fn waterfall_image(name: &str, data: &[f32], nfft: u32, nseg: u32, cf : f32, bw : f32, twin : f32, plot_psd : bool, background_spectrum : &[f32]) {
+fn waterfall_image(name: &str, data: &mut [f32], nfft: u32, nseg: u32, cf : f32, bw : f32, twin : f32, plot_psd : bool, background_spectrum : &[f32]) {
     let mut freq = vec![0.0; nfft as usize];
     let mut view_ratio : f64 = 1.0;
 
     for i in 0..nfft {
         freq[i as usize] = ((bw / nfft as f32) * i as f32) - (bw / 2.0);
+    }
+
+    for i in 0..data.len() {
+        if data[i] < -90.0 {
+            data[i] = -90.0;
+        }
+        if data[i] > 0.0 {
+            data[i] = 0.0;
+        }
     }
 
     let mut fg = Figure::new();
@@ -56,7 +65,7 @@ fn waterfall_image(name: &str, data: &[f32], nfft: u32, nseg: u32, cf : f32, bw 
         .set_x_range(Fix(freq[0] as f64), Fix(freq[freq.len()-1] as f64))
         .set_y_range(Fix(0.0), Fix(nseg as f64 * twin as f64))
 	    .image(
-            data,
+            &*data,
 		    nseg as usize,
             nfft as usize,
             Some((freq[0] as f64, 0.0, freq[freq.len()-1] as f64, nseg as f64 * twin as f64)),
@@ -270,7 +279,7 @@ fn main() {
             }
         }
         println!("Processing Complete");
-        waterfall_image(o, &psd_data, nfft as u32, (nseg/average) as u32, cf as f32, bw as f32, twin, true, &background_spectrum);
+        waterfall_image(o, &mut psd_data, nfft as u32, (nseg/average) as u32, cf as f32, bw as f32, twin, true, &background_spectrum);
     }
 
     let new_now = Instant::now();
