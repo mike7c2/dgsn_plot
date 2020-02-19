@@ -20,7 +20,7 @@ use rayon::prelude::*;
 
 use gnuplot::*;
 
-fn waterfall_image(name: &str, data: &mut [f32], nfft: u32, nseg: u32, cf : f32, bw : f32, twin : f32, plot_psd : bool, background_spectrum : &[f32]) {
+fn waterfall_image(name: &str, data: &mut [f32], nfft: u32, nseg: u32, cf : f32, bw : f32, twin : f32, plot_psd : bool, background_spectrum : &[f32], min : f32, max : f32) {
     let mut freq = vec![0.0; nfft as usize];
     let mut view_ratio : f64 = 1.0;
 
@@ -29,11 +29,11 @@ fn waterfall_image(name: &str, data: &mut [f32], nfft: u32, nseg: u32, cf : f32,
     }
 
     for i in 0..data.len() {
-        if data[i] < -90.0 {
-            data[i] = -90.0;
+        if data[i] < min {
+            data[i] = min;
         }
-        if data[i] > 0.0 {
-            data[i] = 0.0;
+        if data[i] > max {
+            data[i] = max;
         }
     }
 
@@ -135,6 +135,20 @@ fn main() {
                 .takes_value(true)
                 .help("Down conversion factor"),
         )
+        .arg(
+            Arg::with_name("min")
+                .short("n")
+                .long("min")
+                .takes_value(true)
+                .help("Min value for spectrogram"),
+        )
+        .arg(
+            Arg::with_name("max")
+                .short("n")
+                .long("max")
+                .takes_value(true)
+                .help("Max value for spectrogram"),
+        )
         .get_matches();
 
     // Variables for arguments and parameters
@@ -146,6 +160,8 @@ fn main() {
     let mut nseg = 0;
     let mut input_is_float = true;
     let mut dc = 1;
+    let mut min = -100.0;
+    let mut max = -40.0;
 
     // Read arguments
     if let Some(o) = matches.value_of("nfft") {
@@ -174,6 +190,14 @@ fn main() {
 
     if let Some(o) = matches.value_of("dc") {
         dc = o.parse::<usize>().unwrap();
+    }
+
+    if let Some(o) = matches.value_of("min") {
+        min = o.parse::<f32>().unwrap();
+    }
+
+    if let Some(o) = matches.value_of("max") {
+        max = o.parse::<f32>().unwrap();
     }
 
     // Time for each window
@@ -279,7 +303,7 @@ fn main() {
             }
         }
         println!("Processing Complete");
-        waterfall_image(o, &mut psd_data, nfft as u32, (nseg/average) as u32, cf as f32, bw as f32, twin, true, &background_spectrum);
+        waterfall_image(o, &mut psd_data, nfft as u32, (nseg/average) as u32, cf as f32, bw as f32, twin, true, &background_spectrum, min, max);
     }
 
     let new_now = Instant::now();
