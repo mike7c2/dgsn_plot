@@ -140,13 +140,15 @@ fn main() {
                 .short("n")
                 .long("min")
                 .takes_value(true)
+                .allow_hyphen_values(true)
                 .help("Min value for spectrogram"),
         )
         .arg(
             Arg::with_name("max")
-                .short("n")
+                .short("p")
                 .long("max")
                 .takes_value(true)
+                .allow_hyphen_values(true)
                 .help("Max value for spectrogram"),
         )
         .get_matches();
