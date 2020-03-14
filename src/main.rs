@@ -85,6 +85,7 @@ fn main() {
         .author("mike7c2 <mike7c2@gmail.com>")
         .about("Just a toy")
         .arg(Arg::with_name("input").help("Input data").index(1))
+        .arg(Arg::with_name("output").help("Output data").index(2))
         .arg(
             Arg::with_name("nfft")
                 .short("n")
@@ -206,6 +207,11 @@ fn main() {
     let twin = (1.0 / (bw as f32 / nfft as f32)) * average as f32;
 
     if let Some(o) = matches.value_of("input") {
+        let mut output_file = o;
+        if let Some(p) = matches.value_of("output") {
+            output_file = p;
+        }
+
         // Open file, calculate length and nframes
         let fl = fs::File::open(o).unwrap();
         let mmap: &[u8] = unsafe { &MmapOptions::new().map(&fl).unwrap()[..] };
@@ -305,7 +311,7 @@ fn main() {
             }
         }
         println!("Processing Complete");
-        waterfall_image(o, &mut psd_data, nfft as u32, (nseg/average) as u32, cf as f32, bw as f32, twin, true, &background_spectrum, min, max);
+        waterfall_image(output_file, &mut psd_data, nfft as u32, (nseg/average) as u32, cf as f32, bw as f32, twin, true, &background_spectrum, min, max);
     }
 
     let new_now = Instant::now();
